@@ -1,0 +1,18 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Author List</h1>
+  <p>{% if user.is_authenticated and perms.catalog.can_mark_returned %} <a href="/catalog/author/create/">Add New Author</a> {% endif %}</p>
+  {% if author_list %}
+    <ul>
+      {% for ali in author_list %}
+      <li>
+        <a href="{{ ali.get_absolute_url }}">{{ ali.last_name }}, {{ali.first_name}}</a>
+        {% if user.is_authenticated and perms.catalog.can_mark_returned %} | <a href="{{ ali.get_absolute_url }}/update">Update</a> {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>There are no books in the library.</p>
+  {% endif %}
+{% endblock %}
