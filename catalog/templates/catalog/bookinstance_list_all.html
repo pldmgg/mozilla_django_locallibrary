@@ -16,7 +16,7 @@
             {% if bookinst.status == 'o' %}
             Due Date: {{ bookinst.due_back }} |
             Borrower: {{ bookinst.borrower.first_name }} {{ bookinst.borrower.last_name }} |
-            <a href="{% url 'renew-book-librarian' bookinst.id %}">Renew</a>
+            <a href="{% url 'renew-book-librarian' bookinst.id %}">Renew</a> |
             {% endif %}
             {% if bookinst.status != 'o' %}
             <a href="{% url 'renew-book-librarian' bookinst.id %}">Checkout</a> |

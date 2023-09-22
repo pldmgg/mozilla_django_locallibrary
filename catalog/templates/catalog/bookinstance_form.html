@@ -1,6 +1,7 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
+
 {% if bookinstance_object.id %}
 <h1>Book Instance</h1>
 {% else %}
@@ -8,8 +9,9 @@
 {% endif %}
 
 {% if bookinstance_object.id %}
-<div>ID: {{ bookinstance_object.id }}</div>
-<div>Book: <a href="">{{bookinstance_object.book.title}}</a></div>
+<div><b>ID:</b> {{ bookinstance_object.id }}</div>
+<div><b>Book:</b> <a href="{% url 'book-detail' bookinstance_object.book.pk %}">{{bookinstance_object.book.title}}</a></div>
+<br>
 {% endif %}
 
 <form action="" method="post">

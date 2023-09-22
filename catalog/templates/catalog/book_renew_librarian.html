@@ -2,11 +2,11 @@
 
 {% block content %}
   <h1>Renew: {{ book_instance.book.title }}</h1>
-  <p>Borrower: {{ book_instance.borrower }}</p>
-  <p>UUID: {{ book_instance.id }}</p>
-  <p>Loan Status: {{ book_instance.get_status_display }}</p>
-  <p {% if book_instance.is_overdue %} class="text-danger"{% endif %} >Due date: {{ book_instance.due_back }}</p>
-
+  <div><b>Borrower:</b> {{ book_instance.borrower }}</div>
+  <div><b>UUID:</b> {{ book_instance.id }}</div>
+  <div><b>Loan Status:</b> {{ book_instance.get_status_display }}</div>
+  <div {% if book_instance.is_overdue %} class="text-danger"{% endif %} ><b>Due date:</b> {{ book_instance.due_back }}</div>
+  <br>
   <form action="" method="post">
     {% csrf_token %}
     <table>
