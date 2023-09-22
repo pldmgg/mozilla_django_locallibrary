@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+{% if bookinstance_object.id %}
+<h1>Book Instance</h1>
+{% else %}
+<h1>New Book Instance</h1>
+{% endif %}
+
+{% if bookinstance_object.id %}
+<div>ID: {{ bookinstance_object.id }}</div>
+<div>Book: <a href="">{{bookinstance_object.book.title}}</a></div>
+{% endif %}
+
+<form action="" method="post">
+  {% csrf_token %}
+  <table>
+    {{ form.as_table }}
+  </table>
+  <input type="submit" value="Submit" />
+</form>
+{% endblock %}

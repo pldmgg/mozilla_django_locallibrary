@@ -89,7 +89,7 @@ class RenewBookModelForm(ModelForm):
 class BookInstanceCreateForm(forms.ModelForm):
     class Meta:
         model = BookInstance
-        fields = ['book', 'imprint', 'due_back', 'borrower']
+        fields = ['id', 'book', 'imprint', 'due_back', 'borrower']
         
     due_back = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date'}),

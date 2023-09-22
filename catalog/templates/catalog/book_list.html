@@ -3,7 +3,7 @@
 {% block content %}
   <h1>Book List</h1>
   {% if user.is_authenticated and perms.catalog.can_mark_returned %}
-  <p><a href="/catalog/book/create/">Add New Book</a></p>
+  <p><a href="{% url 'book-create' %}">Add New Book</a></p>
   {% endif %}
   {% if book_list %}
     <ul>

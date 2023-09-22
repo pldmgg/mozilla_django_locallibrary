@@ -1,0 +1,32 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>All Book Instances</h1>
+    {% if user.is_authenticated and perms.catalog.can_mark_returned %}
+    <p><a href="{% url 'bookinstance-create' %}">Add New BookInstance</a></p>
+    {% endif %}
+
+    {% if bookinstance_list %}
+    <ul>
+      {% for bookinst in bookinstance_list %} 
+      <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
+        <a href="{% url 'book-detail' bookinst.book.pk %}">{{bookinst.book.title}}</a> |
+        Status: {{ bookinst.get_status_display }} |
+        {% if user.is_staff and perms.catalog.can_mark_returned %}
+            {% if bookinst.status == 'o' %}
+            Due Date: {{ bookinst.due_back }} |
+            Borrower: {{ bookinst.borrower.first_name }} {{ bookinst.borrower.last_name }} |
+            <a href="{% url 'renew-book-librarian' bookinst.id %}">Renew</a>
+            {% endif %}
+            {% if bookinst.status != 'o' %}
+            <a href="{% url 'renew-book-librarian' bookinst.id %}">Checkout</a> |
+            {% endif %}
+        <a href="{% url 'bookinstance-update' bookinst.id %}">Update BookInstance Info</a>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p>There are no books borrowed.</p>
+    {% endif %}       
+{% endblock %}

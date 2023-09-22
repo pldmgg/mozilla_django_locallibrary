@@ -258,6 +258,7 @@ class BookDelete(DeleteView):
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class BookInstanceCreate(CreateView):
     model = BookInstance
+    context_object_name = 'bookinstance_object'
     form_class = BookInstanceCreateForm  # Use the custom form class from forms.py
     template_name = 'catalog/bookinstance_form.html'
     success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
@@ -267,16 +268,16 @@ class BookInstanceCreate(CreateView):
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class BookInstanceUpdate(UpdateView):
     model = BookInstance
+    context_object_name = 'bookinstance_object'
     form_class = BookInstanceUpdateForm  # Use the custom form class from forms.py
     template_name = 'catalog/bookinstance_form.html'
     success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
-    context_object_name = 'bookinstance_object'
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class BookInstanceDelete(DeleteView):
     model = BookInstance
+    context_object_name = 'bookinstance_object'
     template_name = 'catalog/bookinstance_confirm_delete.html'
     success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
-    context_object_name = 'bookinstance_object'
 #### END Views to Create/Update/Delete BookInstances ####
