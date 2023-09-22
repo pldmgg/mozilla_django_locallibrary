@@ -2,11 +2,19 @@
 
 {% block content %}
   <h1>Book List</h1>
+  {% if user.is_authenticated and perms.catalog.can_mark_returned %}
+  <p><a href="/catalog/book/create/">Add New Book</a></p>
+  {% endif %}
   {% if book_list %}
     <ul>
       {% for bli in book_list %}
       <li>
-        <a href="{{ bli.get_absolute_url }}">{{ bli.title }}</a> ({{bli.author}}) (some_data={{some_data}})
+        <a href="{{ bli.get_absolute_url }}">{{ bli.title }}</a> |
+        <a href="{{ bli.author.get_absolute_url }}">({{bli.author}})</a> |
+        {% if user.is_authenticated and perms.catalog.can_mark_returned %}
+        <a href="{{ bli.get_absolute_url }}/update">Update Book Info</a> |
+        {% endif %}
+        (some_data={{some_data}}) |
       </li>
       {% endfor %}
     </ul>

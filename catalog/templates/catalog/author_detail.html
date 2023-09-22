@@ -5,7 +5,8 @@
 <h1>Author: {{ author_detail.first_name }} {{ author_detail.last_name }} </h1>
 <p>{{author_detail.date_of_birth}} - {% if author_detail.date_of_death %}{{author_detail.date_of_death}}{% endif %}</p>
 {% if user.is_authenticated and perms.catalog.can_mark_returned %}
-<p><a href="{{ author_detail.get_absolute_url }}/update">Update</a> <a href="{{ author_detail.get_absolute_url }}/delete">Delete</a></p>{% endif %}
+<p><a href="{{ author_detail.get_absolute_url }}/update">Update</a> <a href="{{ author_detail.get_absolute_url }}/delete">Delete</a></p>
+{% endif %}
 
 <div style="margin-left:20px;margin-top:20px">
 <h4>Books</h4>

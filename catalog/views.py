@@ -13,9 +13,12 @@ import datetime
 from django.contrib.auth.decorators import login_required, permission_required
 from catalog.forms import RenewBookForm
 from catalog.forms import RenewBookModelForm
+from catalog.forms import BookInstanceCreateForm
+from catalog.forms import BookInstanceUpdateForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from catalog.models import Author
+from django import forms
 
 # Create your views here.
 def index(request):
@@ -105,6 +108,17 @@ class AuthorDetailView(generic.DetailView):
     model = Author
     context_object_name = 'author_detail' # This is how we refer to it in jinja syntax in .html templates
 
+class BookInstanceListView(PermissionRequiredMixin, LoginRequiredMixin, generic.ListView):
+    """Generic class-based view listing all books on loan. Only visible to users with can_mark_returned permission."""
+    model = BookInstance
+    context_object_name = 'bookinstance_list'
+    permission_required = 'catalog.can_mark_returned'
+    template_name = 'catalog/bookinstance_list_all.html'
+    paginate_by = 50
+
+    #def get_queryset(self):
+    #    return BookInstance.objects.all()
+
 class LoanedBooksByUserListView(LoginRequiredMixin, generic.ListView):
     """Generic class-based view listing books on loan to current user."""
     model = BookInstance
@@ -186,21 +200,27 @@ def renew_book_librarian(request, pk):
 class AuthorCreate(CreateView):
     model = Author
     fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    template_name = 'catalog/author_form.html'
     initial = {'date_of_death': '11/06/2020'}
     success_url = reverse_lazy('authors') # After form is submitted, page redirects to author_list.html
+    context_object_name = 'author_object'
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class AuthorUpdate(UpdateView):
     model = Author
     fields = '__all__' # Not recommended (potential security issue if more fields added)
+    template_name = 'catalog/author_form.html'
     success_url = reverse_lazy('authors') # After form is submitted, page redirects to author_list.html
+    context_object_name = 'author_object'
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class AuthorDelete(DeleteView):
     model = Author
+    template_name = 'catalog/author_confirm_delete.html'
     success_url = reverse_lazy('authors') # After form is submitted, page redirects to author_list.html
+    context_object_name = 'author_object'
 #### END Views to Create/Update/Delete Authors ####
 
 
@@ -210,23 +230,53 @@ class AuthorDelete(DeleteView):
 class BookCreate(CreateView):
     model = Book
     fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
+    template_name = 'catalog/book_form.html'
     success_url = reverse_lazy('books') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'book_object'
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class BookUpdate(UpdateView):
     model = Book
     fields = ['title', 'author', 'summary', 'isbn', 'genre', 'language']
+    template_name = 'catalog/book_form.html'
     success_url = reverse_lazy('books') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'book_object'
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class BookDelete(DeleteView):
     model = Book
+    template_name = 'catalog/book_confirm_delete.html'
     success_url = reverse_lazy('books') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'book_object'
 #### END Views to Create/Update/Delete Books ####
 
 
 #### BEGIN Views to Create/Update/Delete BookInstances ####
+@method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
+@method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
+class BookInstanceCreate(CreateView):
+    model = BookInstance
+    form_class = BookInstanceCreateForm  # Use the custom form class from forms.py
+    template_name = 'catalog/bookinstance_form.html'
+    success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'bookinstance_object'
 
+@method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
+@method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
+class BookInstanceUpdate(UpdateView):
+    model = BookInstance
+    form_class = BookInstanceUpdateForm  # Use the custom form class from forms.py
+    template_name = 'catalog/bookinstance_form.html'
+    success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'bookinstance_object'
+
+@method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
+@method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
+class BookInstanceDelete(DeleteView):
+    model = BookInstance
+    template_name = 'catalog/bookinstance_confirm_delete.html'
+    success_url = reverse_lazy('bookinstances') # After form is submitted, page redirects to book_list.html
+    context_object_name = 'bookinstance_object'
 #### END Views to Create/Update/Delete BookInstances ####

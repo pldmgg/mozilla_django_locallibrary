@@ -86,5 +86,21 @@ class RenewBookModelForm(ModelForm):
         },
         help_texts = {'due_back': _('Enter a date between now and 4 weeks (default 3).'), 'status': _('')}
 
+class BookInstanceCreateForm(forms.ModelForm):
+    class Meta:
+        model = BookInstance
+        fields = ['book', 'imprint', 'due_back', 'borrower']
+        
+    due_back = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
 
+class BookInstanceUpdateForm(forms.ModelForm):
+    class Meta:
+        model = BookInstance
+        fields = ['imprint', 'due_back', 'borrower']
+        
+    due_back = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}),
+    )
 

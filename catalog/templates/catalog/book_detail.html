@@ -2,6 +2,9 @@
 
 {% block content %}
   <h1>Title: {{ book_detail.title }}</h1>
+  {% if user.is_authenticated and perms.catalog.can_mark_returned %}
+  <p><a href="{{ book_detail.get_absolute_url }}/update">Update</a> <a href="{{ book_detail.get_absolute_url }}/delete">Delete</a></p>
+  {% endif %}
 
   <p><strong>Author:</strong> <a href="{{ book_detail.author.get_absolute_url }}">{{ book_detail.author }}</a></p>
   <p><strong>Summary:</strong> {{ book_detail.summary }}</p>

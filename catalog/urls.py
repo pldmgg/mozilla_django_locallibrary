@@ -14,6 +14,7 @@ urlpatterns = [
 
     ## Shortened BooksListView implementation. ##
     # This demonstrates that the 3rd argument is not necessary because books.html is implied via the "name=" argument
+    # All Books
     path('books/', views.BookListView.as_view(), name='books'),
 
     # BookDetailView Page Url implementation
@@ -21,6 +22,19 @@ urlpatterns = [
     #path('book/<int:pk>', views.BookDetailView.as_view(), name='book-detail'),
     # With Regex
     re_path(r'^book/(?P<pk>\d+)$', views.BookDetailView.as_view(), name='book-detail'),
+
+    path('book/create/', views.BookCreate.as_view(), name='book-create'),
+    path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
+    path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
+    #### END Book Views ####
+
+    #### BEGIN BookInstance Views ####
+    # All BookInstances
+    path('bookinstances/', views.BookInstanceListView.as_view(), name='bookinstances'),
+    
+    path('bookinstance/create/', views.BookInstanceCreate.as_view(), name='bookinstance-create'),
+    path('bookinstance/<uuid:pk>/update/', views.BookInstanceUpdate.as_view(), name='bookinstance-update'),
+    path('bookinstance/<uuid:pk>/delete/', views.BookInstanceDelete.as_view(), name='bookinstance-delete'),
 
     # Books On Loan for the logged in user
     path('mybooks/', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
@@ -30,11 +44,7 @@ urlpatterns = [
 
     # Renew Books Page
     path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),
-
-    path('book/create/', views.BookCreate.as_view(), name='book-create'),
-    path('book/<int:pk>/update/', views.BookUpdate.as_view(), name='book-update'),
-    path('book/<int:pk>/delete/', views.BookDelete.as_view(), name='book-delete'),
-    #### END Book Views ####
+    #### END BookInstance Views ####
 
     #### BEGIN Author Views ####
     # AuthorListView Page Url implementation
