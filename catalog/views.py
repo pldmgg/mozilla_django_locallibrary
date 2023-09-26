@@ -7,18 +7,23 @@ from django.contrib.auth.mixins import PermissionRequiredMixin # For class views
 from django.contrib.auth.decorators import login_required, permission_required # For function views
 from django.utils.decorators import method_decorator # Needed to add the above decorators to class views
 from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
 from django.contrib.auth.decorators import login_required, permission_required
 from catalog.forms import RenewBookForm
 from catalog.forms import RenewBookModelForm
+from catalog.forms import AuthorUpdateForm
+from catalog.forms import AuthorUpdateModelForm
 from catalog.forms import BookInstanceCreateForm
 from catalog.forms import BookInstanceUpdateForm
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from catalog.models import Author
 from django import forms
+from django.contrib import messages
+from django.http import JsonResponse
 
 # Create your views here.
 def index(request):
@@ -94,15 +99,34 @@ class AuthorListView(generic.ListView):
     context_object_name = 'author_list' # This is how we refer to it in jinja syntax in .html templates
     paginate_by = 10 # To access page 2 you would use the URL /catalog/authors/?page=2
 
-    # Pull in data from another Model objects via the below code:
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get the context
-        context = super().get_context_data(**kwargs)
+    # How to pull in data from another Model objects via the below code and...
+    # How to reference the actual request and get access to associated session variable and...
+    # How to have more flexibility with setting Context for templates
+    def get(self, request, *args, **kwargs):
+        # Set the session variable
+        #request.session['author_changes'] = False
+        # The ABOVE is commented out because 'author_changes' is set before the page...
+        # ...is fully rendered, so the code that relies on it being True never fires.
+        # Instead we add some javascript to author_list.html and create a new view...
+        # ...called set_author_changes (see below) that simply acts as an endpoint...
+        # to set the session variable ['author_changes'] to False AFTER...
+        # author_list.html fully renders.
+
         # Fetch data from the Book Model
         all_books = Book.objects.all()
+
         # Add additional context data here
-        context['all_books'] = all_books
-        return context
+        context = {
+            'author_list': self.get_queryset(),  # This is the author_list provided by ListView
+            'all_books': all_books,
+        }
+
+        return render(request, 'catalog/author_list.html', context)
+
+def set_author_changes(request):
+    request.session['author_changes'] = False
+    request.session.save()
+    return JsonResponse({'message': 'Author changes set to False'})
 
 class AuthorDetailView(generic.DetailView):
     model = Author
@@ -209,10 +233,73 @@ class AuthorCreate(CreateView):
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')
 class AuthorUpdate(UpdateView):
     model = Author
-    fields = '__all__' # Not recommended (potential security issue if more fields added)
+    form_class = AuthorUpdateModelForm # Use the custom form class from forms.py
     template_name = 'catalog/author_form.html'
     success_url = reverse_lazy('authors') # After form is submitted, page redirects to author_list.html
     context_object_name = 'author_object'
+    
+@login_required
+@permission_required('catalog.can_mark_returned', raise_exception=True)
+def author_update(request, pk):
+    author_object = get_object_or_404(Author, pk=pk)
+
+    # Check if the form is submitted (HTTP POST request)
+    if request.method == 'POST':
+        # Create a form instance and populate it with data from the request (binding):
+        form = AuthorUpdateForm(
+            author_id=pk,
+            data=request.POST,  # Pass the POST data to the form
+            initial={
+                'first_name': author_object.first_name,
+                'last_name': author_object.last_name,
+                'date_of_birth': author_object.date_of_birth,
+                'date_of_death': author_object.date_of_death
+            },
+        )
+
+        # Check if the form is valid:
+        if form.is_valid():
+            # Check if any data has changed and only save if there are changes
+            if form.has_changed():
+                author_object.first_name = form.cleaned_data['updated_first_name']
+                author_object.last_name = form.cleaned_data['updated_last_name']
+                author_object.date_of_birth = form.cleaned_data['updated_date_of_birth']
+                author_object.date_of_death = form.cleaned_data['updated_date_of_death']
+                author_object.save()
+
+                # Set a session variable to indicate changes
+                # author_changes can be referenced no matter what template we end up navigating to
+                # In this app, author_changes is referenced in author_list.html
+                request.session['author_changes'] = True
+
+                # Redirect to a new URL:
+                #return HttpResponseRedirect(reverse('authors'))
+                #return render(request, 'catalog/author_form.html', {'form': form, 'author_object': author_object, 'changes': True})
+                #return HttpResponseRedirect(reverse('authors'), {'form': form, 'author_object': author_object, 'changes': True})
+                return HttpResponseRedirect(reverse('authors'))
+
+            else:
+                # No changes were made, show a toast notification
+                return render(request, 'catalog/author_form.html', {'form': form, 'author_object': author_object, 'no_changes': True})
+                #messages.info(request, 'No changes were made.')
+    else:
+        # This is a GET request or other method, create the form without POST data
+        form = AuthorUpdateForm(
+            author_id=pk,
+            initial={
+                'first_name': author_object.first_name,
+                'last_name': author_object.last_name,
+                'date_of_birth': author_object.date_of_birth,
+                'date_of_death': author_object.date_of_death
+            },
+        )
+
+    context = {
+        'form': form,
+        'author_object': author_object,
+    }
+
+    return render(request, 'catalog/author_form.html', context)
 
 @method_decorator(login_required, name='dispatch') # IMPORTANT NOTE: "dispatch" is the method of the class view that is being targeted by the @method_decorator decorator.
 @method_decorator(permission_required('catalog.can_mark_returned'), name='dispatch')

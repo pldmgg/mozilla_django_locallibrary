@@ -49,6 +49,7 @@ urlpatterns = [
     #### BEGIN Author Views ####
     # AuthorListView Page Url implementation
     path('authors/', views.AuthorListView.as_view(), name='authors'),
+    path('set_author_changes/', views.set_author_changes, name='set_author_changes'),
 
     # AuthorDetailView Page Url implementation
     # Without regex
@@ -57,7 +58,8 @@ urlpatterns = [
     re_path(r'^author/(?P<pk>\d+)$', views.AuthorDetailView.as_view(), name='author-detail'),
 
     path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
-    path('author/<int:pk>/update/', views.AuthorUpdate.as_view(), name='author-update'),
+    #path('author/<int:pk>/update/', views.AuthorUpdate.as_view(), name='author-update'),
+    path('author/<int:pk>/update/', views.author_update, name='author-update'),
     path('author/<int:pk>/delete/', views.AuthorDelete.as_view(), name='author-delete'),
     #### END Author Views ####
 ]

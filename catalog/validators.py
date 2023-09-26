@@ -13,10 +13,14 @@ from django.utils.translation import gettext_lazy as _
 #    
 #    return True
 
-def Check_MinDateValue(datedata: datetime.date) -> bool:
+def Check_MinDateValue(
+        datedata: datetime.date,
+        errmsg: str = 'Invalid date - renewal in past'
+    ) -> bool:
+
     # Check if a date is not in the past.
     if datedata < datetime.date.today():
-        raise ValidationError(_('Invalid date - renewal in past'))
+        raise ValidationError(_(errmsg))
     
     return True
     
@@ -42,19 +46,14 @@ class MinDateValidator:
         
         return True
 
-# Functions with multiple arguments don't work in the validators=[] context in forms.py
-#def Check_MaxDateValue(datedata: datetime.date, errmsg: str) -> bool:
-#    # Check if a date is in the allowed range (+4 weeks from today).
-#    if datedata > datetime.date.today() + datetime.timedelta(weeks=4):
-#        raise ValidationError(_(errmsg))
-#
-#    # Remember to always return the cleaned data.
-#    return True
-
-def Check_MaxDateValue(datedata: datetime.date) -> bool:
+def Check_MaxDateValue(
+        datedata: datetime.date,
+        errmsg: str = 'Invalid date - renewal more than 4 weeks ahead'
+    ) -> bool:
+    
     # Check if a date is in the allowed range (+4 weeks from today).
     if datedata > datetime.date.today() + datetime.timedelta(weeks=4):
-        raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
+        raise ValidationError(_(errmsg))
     
     return True
     
@@ -79,3 +78,28 @@ class MaxDateValidator:
             raise ValidationError(error_message, code="invalid_value")
         
         return True
+    
+def Compare_Dates(
+        birth_date: datetime.date,
+        death_date: datetime.date,
+        errmsg: str = 'Death Date is before Birth Date!'
+    ) -> bool:
+    
+    # Check if a date is in the allowed range (+4 weeks from today).
+    if death_date < birth_date:
+        raise ValidationError(_(errmsg))
+    
+    return True
+
+def Compare_FirstLastName(
+        firstname: str,
+        lastname: str,
+        errmsg: str = "First name and last name can't be the same."
+    ) -> bool:
+    
+    if firstname and lastname and firstname == lastname:
+        raise forms.ValidationError(errmsg)
+    
+    return True
+
+

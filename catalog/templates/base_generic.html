@@ -18,6 +18,11 @@
         src="{% static 'catalog/images/local_library_model_uml.svg' %}"
         alt="UML diagram"
         style="width:555px;height:540px;" />
+
+    <!-- Toastr CSS and JavaScript -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   </head>
   <body>
     <div class="container-fluid">
@@ -30,7 +35,6 @@
               <li><a href="{% url 'authors' %}">All Authors</a></li>
             {% if user.is_authenticated and perms.catalog.can_mark_returned %}
               <li><a href="{% url 'all-borrowed' %}">All Borrowed</a>
-              <li><a href="{% url 'author-create' %}">Author Create</a>
             {% endif %}
             </ul>
             <ul class="sidebar-nav">

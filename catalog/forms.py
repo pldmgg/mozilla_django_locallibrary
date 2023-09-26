@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.forms import ModelForm # For class RenewBookModelForm
 from catalog.models import BookInstance
+from catalog.models import Author
 from .validators import *
 from django.contrib.auth.models import User
 
@@ -36,7 +37,7 @@ class RenewBookForm(forms.Form):
                 errmsg = 'Invalid date - renewal more than 4 weeks ahead'
             ),
         ],
-        help_text = "Enter a date between now and 4 weeks (default 3)."
+        help_text = "Enter a date between now and 4 weeks (default 3).",
     )
 
     user_list = User.objects.all().order_by('last_name')
@@ -67,7 +68,7 @@ class RenewBookForm(forms.Form):
 
 # You can also just pull the fields from the Model directly using ModelForm, but
 # this approach is less flexible than the above using forms.Form    
-class RenewBookModelForm(ModelForm):
+class RenewBookModelForm(forms.ModelForm):
     class Meta:
         model = BookInstance
         #fields = '__all__'
@@ -85,6 +86,81 @@ class RenewBookModelForm(ModelForm):
             ),
         },
         help_texts = {'due_back': _('Enter a date between now and 4 weeks (default 3).'), 'status': _('')}
+
+class AuthorUpdateForm(forms.Form):
+    updated_first_name = forms.CharField(
+        label = "Updated First Name",
+        required = True,
+        max_length = 100,
+        help_text = "Enter the Author's first name",
+    )
+    updated_last_name = forms.CharField(
+        label = "Updated Last Name",
+        required = True,
+        max_length = 100,
+        help_text = "Enter the Author's last name",
+    )
+    updated_date_of_birth = forms.DateField(
+        label = "Date of Birth",
+        required = False,
+        widget = forms.SelectDateWidget(
+            years = range(1900, 2100)
+        ),
+    )
+    updated_date_of_death = forms.DateField(
+        label = "Date of Death",
+        required = False,
+        widget = forms.SelectDateWidget(
+            years = range(1900, 2100)
+        ),
+    )
+
+    def __init__(self, *args, **kwargs):
+        author_id = kwargs.pop('author_id', None)
+        super(AuthorUpdateForm, self).__init__(*args, **kwargs)
+
+        # Now you can use the author_id to fetch the author and pre-fill the form fields
+        if author_id is not None:
+            author = Author.objects.get(pk=author_id)
+            self.fields['updated_first_name'].initial = author.first_name
+            self.fields['updated_last_name'].initial = author.last_name
+            self.fields['updated_date_of_birth'].initial = author.date_of_birth
+            self.fields['updated_date_of_death'].initial = author.date_of_death
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date_of_birth = cleaned_data.get('updated_date_of_birth')
+        date_of_death = cleaned_data.get('updated_date_of_death')
+        first_name = cleaned_data.get('updated_first_name')
+        last_name = cleaned_data.get('updated_last_name')
+
+        if date_of_birth and date_of_death and date_of_birth >= date_of_death:
+            raise forms.ValidationError('Date of death must be after date of birth.')
+
+        if first_name and last_name and first_name == last_name:
+            raise forms.ValidationError("First name and last name can't be the same.")
+
+        return cleaned_data
+    
+class AuthorUpdateModelForm(forms.ModelForm):
+    class Meta:
+        model = Author
+        fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date_of_birth = cleaned_data.get('date_of_birth')
+        date_of_death = cleaned_data.get('date_of_death')
+        first_name = cleaned_data.get('first_name')
+        last_name = cleaned_data.get('last_name')
+
+        # Make sure birth date is before death date
+        Compare_Dates(birth_date = date_of_birth, death_date = date_of_death)
+
+        # Make sure first and last name aren't the same
+        Compare_FirstLastName(firstname = first_name, lastname = last_name)
+
+        return cleaned_data
 
 class BookInstanceCreateForm(forms.ModelForm):
     class Meta:

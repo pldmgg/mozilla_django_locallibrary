@@ -3,7 +3,7 @@
 {% block content %}
   <h1>Author List</h1>
   {% if user.is_authenticated and perms.catalog.can_mark_returned %}
-  <p><a href="/catalog/author/create/">Add New Author</a></p>
+  <p><a href="{% url 'author-create' %}">Add New Author</a></p>
   {% endif %}
   {% if author_list %}
     <ul>
@@ -11,12 +11,37 @@
       <li>
         <a href="{{ ali.get_absolute_url }}">{{ ali.last_name }}, {{ali.first_name}}</a> |
         {% if user.is_authenticated and perms.catalog.can_mark_returned %}
-        <a href="{{ ali.get_absolute_url }}/update">Update Author Info</a> |
+        <a href="{{ ali.get_absolute_url }}/update">Update Author</a>
         {% endif %}
       </li>
       {% endfor %}
     </ul>
   {% else %}
     <p>There are no books in the library.</p>
+  {% endif %}
+
+  <!-- JavaScript to display Toastr notifications -->
+  {% if request.session.author_changes %}
+  <script>
+      // Trigger Toastr for changes
+      toastr.success('Author data has been updated.');
+
+      // Wait for the document to fully load
+      document.addEventListener("DOMContentLoaded", function() {
+        // Set the session variable after the page is loaded
+        fetch('{% url "set_author_changes" %}')
+            .then(response => {
+                if (response.ok) {
+                    // The session variable has been set to False
+                    console.log("Author changes set to False");
+                } else {
+                    console.error("Failed to set author changes");
+                }
+            })
+            .catch(error => {
+                console.error("An error occurred: " + error);
+            });
+    });
+  </script>
   {% endif %}
 {% endblock %}

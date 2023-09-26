@@ -8,4 +8,22 @@
   </table>
   <input type="submit" value="Submit" />
 </form>
+
+<!-- JavaScript to display Toastr notifications -->
+{% if no_changes %}
+<script>
+  $(document).ready(function() {
+      // Check if the 'no_changes' variable is true (set it in your view)
+      toastr.warning('No changes were made.');
+  });
+</script>
+{% elif changes %}
+<script>
+  $(document).ready(function() {
+      // Check if the 'no_changes' variable is true (set it in your view)
+      toastr.warning('Update successful!');
+  });
+</script>
+{% endif %}
+
 {% endblock %}
